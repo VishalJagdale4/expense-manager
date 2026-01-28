@@ -21,13 +21,20 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category createCategory(CategoryDto dto) throws BadRequestException {
 
-        if (Objects.nonNull(dto.getParentCategoryId())) {
-            categoryRepository.findById(dto.getParentCategoryId())
-                    .orElseThrow(() -> new BadRequestException("Parent Category not found"));
+        Long parentId = dto.getParentCategoryId();
+
+        if (parentId != null) {
+            Category parent = categoryRepository.findById(parentId)
+                    .filter(c -> !c.getIsDeleted())
+                    .orElseThrow(() -> new BadRequestException("Parent category not found or deleted"));
+
+            if (parent.getParentCategoryId() != null) {
+                throw new BadRequestException("Sub-sub category not allowed");
+            }
         }
 
         List<Category> existing =
-                categoryRepository.findByNameAndParentCategoryIdAndDeletedFalse(
+                categoryRepository.findByNameAndParentCategoryIdAndIsDeletedFalse(
                         dto.getName(),
                         dto.getParentCategoryId()
                 );
@@ -44,34 +51,34 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getCategory(Long id) throws BadRequestException {
         return categoryRepository.findById(id)
-                .filter(c -> !c.getDeleted())
+                .filter(c -> !c.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Category not found"));
     }
 
     @Override
     public List<Category> getCategoryByParent(Long id) throws BadRequestException {
-        return categoryRepository.findByParentCategoryIdAndDeletedFalseOrderByName(id);
+        return categoryRepository.findByParentCategoryIdAndIsDeletedFalseOrderByName(id);
     }
 
     @Override
     public List<Category> getAllCategories() {
-        return categoryRepository.findByDeletedFalseOrderByName();
+        return categoryRepository.findByIsDeletedFalseOrderByName();
     }
 
     @Override
     @Transactional
     public void deleteCategory(Long id) throws BadRequestException {
-        Category category = categoryRepository.findByIdAndDeletedFalse(id);
+        Category category = categoryRepository.findByIdAndIsDeletedFalse(id);
 
         if (Objects.isNull(category)) {
             throw new BadRequestException("Category not found");
         }
 
-        category.setDeleted(true);
+        category.setIsDeleted(true);
 
         // All child Categories
-        List<Category> categories = categoryRepository.findByParentCategoryIdAndDeletedFalseOrderByName(id);
-        categories.forEach(c -> c.setDeleted(true));
+        List<Category> categories = categoryRepository.findByParentCategoryIdAndIsDeletedFalseOrderByName(id);
+        categories.forEach(c -> c.setIsDeleted(true));
 
         categories.add(category);
 
@@ -88,11 +95,11 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         Category existing = categoryRepository.findById(dto.getId())
-                .filter(category -> !category.getDeleted())
+                .filter(category -> !category.getIsDeleted())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
         List<Category> existingDuplicates =
-                categoryRepository.findByIdNotAndNameAndParentCategoryIdAndDeletedFalse(
+                categoryRepository.findByIdNotAndNameAndParentCategoryIdAndIsDeletedFalse(
                         dto.getId(),
                         dto.getName(),
                         dto.getParentCategoryId()

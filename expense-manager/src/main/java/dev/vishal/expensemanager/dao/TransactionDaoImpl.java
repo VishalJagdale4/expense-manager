@@ -2,7 +2,7 @@ package dev.vishal.expensemanager.dao;
 
 import dev.vishal.expensemanager.dto.TransactionDto;
 import dev.vishal.expensemanager.dto.TransactionResponseDto;
-import dev.vishal.expensemanager.entity.BankAccount;
+import dev.vishal.expensemanager.entity.Account;
 import dev.vishal.expensemanager.entity.Category;
 import dev.vishal.expensemanager.entity.Transaction;
 import jakarta.persistence.EntityManager;
@@ -33,7 +33,7 @@ public class TransactionDaoImpl implements TransactionDao {
         CriteriaQuery<TransactionResponseDto> criteriaQuery = criteriaBuilder.createQuery(TransactionResponseDto.class);
 
         Root<Transaction> transactionRoot = criteriaQuery.from(Transaction.class);
-        Root<BankAccount> bankAccountRoot = criteriaQuery.from(BankAccount.class);
+        Root<Account> bankAccountRoot = criteriaQuery.from(Account.class);
         Root<Category> categoryRoot = criteriaQuery.from(Category.class);
 
         criteriaQuery.select(criteriaBuilder.construct(
@@ -56,7 +56,7 @@ public class TransactionDaoImpl implements TransactionDao {
 
         predicates.add(criteriaBuilder.equal(transactionRoot.get("accountId"), bankAccountRoot.get("id")));
         predicates.add(criteriaBuilder.equal(transactionRoot.get("categoryId"), categoryRoot.get("id")));
-        predicates.add(criteriaBuilder.equal(transactionRoot.get("deleted"), false));
+        predicates.add(criteriaBuilder.equal(transactionRoot.get("isDeleted"), false));
 
         // filters
 
