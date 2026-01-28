@@ -26,14 +26,14 @@ public class Category {
     @Column(name = "updated_on")
     private LocalDateTime updatedOn;
 
-    @Column(name = "deleted")
-    private Boolean deleted;
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
 
     @PrePersist
     protected void onCreate() {
         createdOn = LocalDateTime.now();
         updatedOn = LocalDateTime.now();
-        deleted = false; // default value
+        isDeleted = false; // default value
     }
 
     @PreUpdate

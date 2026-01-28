@@ -4,9 +4,9 @@ import dev.vishal.expensemanager.common.exception.BadRequestException;
 import dev.vishal.expensemanager.dao.TransactionDao;
 import dev.vishal.expensemanager.dto.TransactionDto;
 import dev.vishal.expensemanager.dto.TransactionResponseDto;
-import dev.vishal.expensemanager.entity.BankAccount;
+import dev.vishal.expensemanager.entity.Account;
 import dev.vishal.expensemanager.entity.Transaction;
-import dev.vishal.expensemanager.repository.BankAccountRepository;
+import dev.vishal.expensemanager.repository.AccountRepository;
 import dev.vishal.expensemanager.repository.CategoryRepository;
 import dev.vishal.expensemanager.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,21 +24,21 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final TransactionDao transactionDao;
-    private final BankAccountRepository bankAccountRepository;
+    private final AccountRepository accountRepository;
     private final CategoryRepository categoryRepository;
 
     @Override
     @Transactional
     public Transaction createTransaction(TransactionDto dto) {
 
-        BankAccount bankAccount = bankAccountRepository.findById(dto.getAccountId())
-                .filter(account -> !account.getDeleted())
+        Account account = accountRepository.findById(dto.getAccountId())
+                .filter(acc -> !acc.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Bank account not found"));
 
         BigDecimal amount =
                 getTransactionAmount(dto.getTransactionType(), dto.getAmount(), false); // Gets +/- amount by txnType
-        bankAccount.setBalance(bankAccount.getBalance().add(amount)); // Balance update
-        bankAccountRepository.save(bankAccount);
+        account.setBalance(account.getBalance().add(amount)); // Balance update
+        accountRepository.save(account);
 
         Transaction transaction = new Transaction();
         copyDtoToEntity(dto, transaction);
@@ -48,7 +48,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Transaction getTransaction(Long id) {
         return transactionRepository.findById(id)
-                .filter(t -> !t.getDeleted())
+                .filter(t -> !t.getIsDeleted())
                 .map(this::populateTransientFields)
                 .orElseThrow(() -> new BadRequestException("Transaction not found"));
     }
@@ -60,7 +60,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<String> getTransactionNotes(TransactionDto dto) {
-        return transactionRepository.findByDeletedFalseAndNoteContainingIgnoreCase(dto.getNoteLike())
+        return transactionRepository.findByIsDeletedFalseAndNoteContainingIgnoreCase(dto.getNoteLike())
                 .stream()
                 .map(Transaction::getNote)
                 .distinct()
@@ -71,9 +71,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public void deleteTransaction(Long id) {
         Transaction transaction = transactionRepository.findById(id)
-                .filter(txn -> !txn.getDeleted())
+                .filter(txn -> !txn.getIsDeleted())
                 .map(txn -> {
-                    txn.setDeleted(true);
+                    txn.setIsDeleted(true);
                     return txn;
                 })
                 .orElseThrow(() -> new BadRequestException("Transaction not found"));
@@ -84,7 +84,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public Transaction updateTransaction(TransactionDto dto) {
         Transaction existing = transactionRepository.findById(dto.getId())
-                .filter(txn -> !txn.getDeleted())
+                .filter(txn -> !txn.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Transaction not found"));
 
         boolean changed = isUserInputChanged(existing, dto);
@@ -93,8 +93,8 @@ public class TransactionServiceImpl implements TransactionService {
             return transactionRepository.save(existing);
         }
 
-        BankAccount bankAccount = bankAccountRepository.findById(dto.getAccountId())
-                .filter(account -> !account.getDeleted())
+        Account account = accountRepository.findById(dto.getAccountId())
+                .filter(acc -> !acc.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Bank account not found"));
 
         BigDecimal newAmount =
@@ -102,8 +102,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         BigDecimal oldAmount = // Gets +/- amount by txnType and reverse it
                 getTransactionAmount(existing.getTransactionType(), existing.getAmount(), true);
-        bankAccount.setBalance(bankAccount.getBalance().add(oldAmount).add(newAmount)); // Balance update6
-        bankAccountRepository.save(bankAccount);
+        account.setBalance(account.getBalance().add(oldAmount).add(newAmount)); // Balance update6
+        accountRepository.save(account);
 
         // clone transaction
         Transaction newTransaction = new Transaction();
@@ -113,7 +113,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction saved = transactionRepository.save(newTransaction);
 
         // mark old deleted
-        existing.setDeleted(true);
+        existing.setIsDeleted(true);
         transactionRepository.save(existing);
 
         return saved;
@@ -136,8 +136,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (notEquals(entity.getTransactionType(), dto.getTransactionType())) return true;
         if (notEquals(entity.getAccountId(), dto.getAccountId())) return true;
         if (notEquals(entity.getCategoryId(), dto.getCategoryId())) return true;
-        if (notEquals(entity.getTransactionDatetime(), dto.getTransactionDatetime())) return true;
-        return false;
+        return notEquals(entity.getTransactionDatetime(), dto.getTransactionDatetime());
     }
 
     private boolean notEquals(Object a, Object b) {
@@ -158,7 +157,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private Transaction populateTransientFields(Transaction t) {
         if (t.getAccountId() != null) {
-            bankAccountRepository.findById(t.getAccountId())
+            accountRepository.findById(t.getAccountId())
                     .ifPresent(b -> t.setAccountName(b.getName()));
         }
         if (t.getCategoryId() != null) {

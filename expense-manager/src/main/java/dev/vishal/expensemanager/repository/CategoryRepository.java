@@ -9,13 +9,13 @@ import java.util.List;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    Category findByIdAndDeletedFalse(Long id);
+    Category findByIdAndIsDeletedFalse(Long id);
 
-    List<Category> findByNameAndParentCategoryIdAndDeletedFalse(String name, Long parentCategoryId);
+    List<Category> findByNameAndParentCategoryIdAndIsDeletedFalse(String name, Long parentCategoryId);
 
-    List<Category> findByIdNotAndNameAndParentCategoryIdAndDeletedFalse(Long id, String name, Long parentCategoryId);
+    List<Category> findByIdNotAndNameAndParentCategoryIdAndIsDeletedFalse(Long id, String name, Long parentCategoryId);
 
-    List<Category> findByParentCategoryIdAndDeletedFalseOrderByName(Long parentCategoryId);
+    List<Category> findByParentCategoryIdAndIsDeletedFalseOrderByName(Long parentCategoryId);
 
-    List<Category> findByDeletedFalseOrderByName();
+    List<Category> findByIsDeletedFalseOrderByName();
 }

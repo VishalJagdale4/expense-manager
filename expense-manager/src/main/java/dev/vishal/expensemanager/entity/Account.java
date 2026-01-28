@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "Bank_Account")
-public class BankAccount {
+@Table(name = "account")
+public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,14 +30,14 @@ public class BankAccount {
     @Column(name = "updated_on")
     private LocalDateTime updatedOn;
 
-    @Column(name = "deleted")
-    private Boolean deleted;
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
 
     @PrePersist
     protected void onCreate() {
         createdOn = LocalDateTime.now();
         updatedOn = LocalDateTime.now();
-        deleted = false; // default value
+        isDeleted = false; // default value
     }
 
     @PreUpdate
