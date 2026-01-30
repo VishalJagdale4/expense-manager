@@ -126,7 +126,7 @@ public class TransactionController {
 
         List<String> notes = new ArrayList<>();
 
-        if(StringUtils.hasText(dto.getNoteLike())){
+        if (StringUtils.hasText(dto.getNoteLike())) {
             dto.setNoteLike(dto.getNoteLike().strip());
             notes = transactionService.getTransactionNotes(dto);
         }

@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories(basePackages = "dev.vishal.expensemanager.repository")
 public class ExpenseManagerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ExpenseManagerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ExpenseManagerApplication.class, args);
+    }
 
 }
