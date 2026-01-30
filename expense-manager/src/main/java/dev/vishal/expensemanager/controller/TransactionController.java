@@ -12,10 +12,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/transaction")
@@ -32,6 +34,10 @@ public class TransactionController {
 
         if (Objects.isNull(dto.getAmount())) {
             throw new BadRequestException("Amount is mandatory!");
+        }
+
+        if (dto.getAmount().equals(BigDecimal.ZERO)) {
+            throw new BadRequestException("Amount value 0 is not allowed!");
         }
 
         if (!StringUtils.hasText(dto.getNote())) {
@@ -94,7 +100,7 @@ public class TransactionController {
     }
 
     @GetMapping("/getTransaction/{id}")
-    public ResponseEntity<ResponseDTO> getTransaction(@PathVariable Long id) {
+    public ResponseEntity<ResponseDTO> getTransaction(@PathVariable UUID id) {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/getTransaction";
 
@@ -121,6 +127,7 @@ public class TransactionController {
         List<String> notes = new ArrayList<>();
 
         if(StringUtils.hasText(dto.getNoteLike())){
+            dto.setNoteLike(dto.getNoteLike().strip());
             notes = transactionService.getTransactionNotes(dto);
         }
 
@@ -128,7 +135,7 @@ public class TransactionController {
     }
 
     @DeleteMapping("/deleteTransaction/{id}")
-    public ResponseEntity<ResponseDTO> deleteTransaction(@PathVariable Long id) {
+    public ResponseEntity<ResponseDTO> deleteTransaction(@PathVariable UUID id) {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/deleteTransaction";
 

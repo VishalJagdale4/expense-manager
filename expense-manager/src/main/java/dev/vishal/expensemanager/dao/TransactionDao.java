@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface TransactionDao {
     List<TransactionResponseDto> findTransactions(TransactionDto transactionDto);
+    List<String> findNotes(TransactionDto transactionDto);
 }

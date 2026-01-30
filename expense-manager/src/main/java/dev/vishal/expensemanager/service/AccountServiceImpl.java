@@ -86,7 +86,6 @@ public class AccountServiceImpl implements AccountService {
         if (!CollectionUtils.isEmpty(existingDuplicates)) {
             throw new BadRequestException("Account already exists!");
         }
-        dto.setBalance(existing.getBalance());  // Balance as it is
         copyDtoToEntity(dto, existing);
         return accountRepository.save(existing);
     }
@@ -96,7 +95,6 @@ public class AccountServiceImpl implements AccountService {
     private void copyDtoToEntity(AccountDto dto, Account entity) {
         entity.setName(dto.getName());
         entity.setType(dto.getType());
-        entity.setBalance(dto.getBalance());
     }
 
 }

@@ -21,9 +21,6 @@ public class Account {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "balance", nullable = false)
-    private BigDecimal balance;
-
     @Column(name = "created_on")
     private LocalDateTime createdOn;
 
