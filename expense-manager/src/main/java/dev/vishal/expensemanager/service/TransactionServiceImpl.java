@@ -36,11 +36,11 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public Transaction createTransaction(TransactionDto dto) {
 
-       accountRepository.findById(dto.getAccountId())
+        accountRepository.findById(dto.getAccountId())
                 .filter(acc -> !acc.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Account not found or deleted"));
 
-       categoryRepository.findById(dto.getCategoryId())
+        categoryRepository.findById(dto.getCategoryId())
                 .filter(cat -> !cat.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Category not found or deleted"));
 
@@ -74,12 +74,15 @@ public class TransactionServiceImpl implements TransactionService {
                 .filter(txn -> !txn.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Transaction not found"));
 
+        transaction.setAmount(transaction.getAmount().abs());
         return populateTransientFields(transaction);
     }
 
     @Override
     public List<TransactionResponseDto> getAllTransactions(TransactionDto dto) {
-        return transactionDao.findTransactions(dto);
+        List<TransactionResponseDto> transactionResponseDtoList = transactionDao.findTransactions(dto);
+        transactionResponseDtoList.forEach(txn -> txn.setAmount((txn.getAmount().abs())));
+        return transactionResponseDtoList;
     }
 
     @Override
