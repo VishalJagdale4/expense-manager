@@ -1,17 +1,15 @@
 package dev.vishal.expensemanager.service;
 
 import dev.vishal.expensemanager.common.exception.BadRequestException;
-import dev.vishal.expensemanager.dao.TransactionDao;
+import dev.vishal.expensemanager.dao.TransactionsDao;
 import dev.vishal.expensemanager.dto.TransactionDto;
 import dev.vishal.expensemanager.dto.TransactionResponseDto;
-import dev.vishal.expensemanager.entity.Account;
-import dev.vishal.expensemanager.entity.Category;
 import dev.vishal.expensemanager.entity.LogicalTransaction;
-import dev.vishal.expensemanager.entity.Transaction;
+import dev.vishal.expensemanager.entity.Transactions;
 import dev.vishal.expensemanager.repository.AccountRepository;
 import dev.vishal.expensemanager.repository.CategoryRepository;
 import dev.vishal.expensemanager.repository.LogicalTransactionRepository;
-import dev.vishal.expensemanager.repository.TransactionRepository;
+import dev.vishal.expensemanager.repository.TransactionsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,15 +24,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository transactionRepository;
+    private final TransactionsRepository transactionsRepository;
     private final LogicalTransactionRepository logicalTransactionRepository;
-    private final TransactionDao transactionDao;
+    private final TransactionsDao transactionsDao;
     private final AccountRepository accountRepository;
     private final CategoryRepository categoryRepository;
 
     @Override
     @Transactional
-    public Transaction createTransaction(TransactionDto dto) {
+    public Transactions createTransaction(TransactionDto dto) {
 
         accountRepository.findById(dto.getAccountId())
                 .filter(acc -> !acc.getIsDeleted())
@@ -48,10 +46,10 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal amount = applyTransactionTypeToAmount(dto.getTransactionType(), dto.getAmount());
         dto.setAmount(amount);
 
-        Transaction transaction = new Transaction();
+        Transactions transaction = new Transactions();
         copyDtoToEntity(dto, transaction);
         transaction.setVersionNumber(0L);
-        transaction = transactionRepository.save(transaction);
+        transaction = transactionsRepository.save(transaction);
 
         LogicalTransaction logicalTransaction = new LogicalTransaction();
         logicalTransaction.setTransactionId(transaction.getId());
@@ -59,18 +57,18 @@ public class TransactionServiceImpl implements TransactionService {
         logicalTransaction = logicalTransactionRepository.save(logicalTransaction);
 
         transaction.setLogicalTransactionId(logicalTransaction.getId());
-        transactionRepository.save(transaction);
+        transactionsRepository.save(transaction);
 
         return transaction;
     }
 
     @Override
-    public Transaction getTransaction(UUID id) {
+    public Transactions getTransaction(UUID id) {
         LogicalTransaction logicalTransaction = logicalTransactionRepository.findById(id)
                 .filter(t -> !t.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Transaction not found"));
 
-        Transaction transaction = transactionRepository.findById(logicalTransaction.getTransactionId())
+        Transactions transaction = transactionsRepository.findById(logicalTransaction.getTransactionId())
                 .filter(txn -> !txn.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Transaction not found"));
 
@@ -80,14 +78,14 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<TransactionResponseDto> getAllTransactions(TransactionDto dto) {
-        List<TransactionResponseDto> transactionResponseDtoList = transactionDao.findTransactions(dto);
+        List<TransactionResponseDto> transactionResponseDtoList = transactionsDao.findTransactions(dto);
         transactionResponseDtoList.forEach(txn -> txn.setAmount((txn.getAmount().abs())));
         return transactionResponseDtoList;
     }
 
     @Override
     public List<String> getTransactionNotes(TransactionDto dto) {
-        return transactionDao.findNotes(dto);
+        return transactionsDao.findNotes(dto);
     }
 
     @Override
@@ -105,12 +103,12 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public Transaction updateTransaction(TransactionDto dto) {
+    public Transactions updateTransaction(TransactionDto dto) {
         LogicalTransaction logicalTransaction = logicalTransactionRepository.findById(dto.getId())
                 .filter(txn -> !txn.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Transaction not found"));
 
-        Transaction existing = transactionRepository.findById(logicalTransaction.getTransactionId())
+        Transactions existing = transactionsRepository.findById(logicalTransaction.getTransactionId())
                 .filter(txn -> !txn.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Transaction not found"));
 
@@ -118,7 +116,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (!changed) {
             logicalTransactionRepository.save(logicalTransaction);
-            return transactionRepository.save(existing);
+            return transactionsRepository.save(existing);
         }
 
         accountRepository.findById(dto.getAccountId())
@@ -134,12 +132,12 @@ public class TransactionServiceImpl implements TransactionService {
         dto.setAmount(amount);
 
         // clone transaction
-        Transaction newTransaction = new Transaction();
+        Transactions newTransaction = new Transactions();
         copyDtoToEntity(dto, newTransaction);
         newTransaction.setVersionNumber(existing.getVersionNumber() + 1);
         newTransaction.setLogicalTransactionId(existing.getId());
 
-        Transaction saved = transactionRepository.save(newTransaction);
+        Transactions saved = transactionsRepository.save(newTransaction);
 
         // update new pointer txn
         logicalTransaction.setTransactionId(saved.getId());
@@ -150,7 +148,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     // ------------------ Helper methods ------------------
 
-    private void copyDtoToEntity(TransactionDto dto, Transaction entity) {
+    private void copyDtoToEntity(TransactionDto dto, Transactions entity) {
         entity.setAmount(dto.getAmount());
         entity.setNote(dto.getNote());
         entity.setTransactionType(dto.getTransactionType());
@@ -159,7 +157,7 @@ public class TransactionServiceImpl implements TransactionService {
         entity.setTransactionDatetime(dto.getTransactionDatetime());
     }
 
-    private boolean isUserInputChanged(Transaction entity, TransactionDto dto) {
+    private boolean isUserInputChanged(Transactions entity, TransactionDto dto) {
         if (notEquals(entity.getAmount(), dto.getAmount())) return true;
         if (notEquals(entity.getNote(), dto.getNote())) return true;
         if (notEquals(entity.getTransactionType(), dto.getTransactionType())) return true;
@@ -184,7 +182,7 @@ public class TransactionServiceImpl implements TransactionService {
         return !a.equals(b);
     }
 
-    private Transaction populateTransientFields(Transaction transaction) {
+    private Transactions populateTransientFields(Transactions transaction) {
         if (transaction.getAccountId() != null) {
             accountRepository.findById(transaction.getAccountId())
                     .ifPresent(account -> transaction.setAccountName(account.getName()));
