@@ -6,6 +6,7 @@ import dev.vishal.expensemanager.entity.Transaction;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface TransactionService {
 
@@ -13,11 +14,11 @@ public interface TransactionService {
 
     Transaction updateTransaction(TransactionDto dto);
 
-    Transaction getTransaction(Long id);
+    Transaction getTransaction(UUID id);
 
     List<TransactionResponseDto> getAllTransactions(TransactionDto dto);
 
     List<String> getTransactionNotes(TransactionDto dto);
 
-    void deleteTransaction(Long id);
+    void deleteTransaction(UUID id);
 }

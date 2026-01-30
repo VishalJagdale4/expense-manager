@@ -4,6 +4,7 @@ import dev.vishal.expensemanager.dto.TransactionDto;
 import dev.vishal.expensemanager.dto.TransactionResponseDto;
 import dev.vishal.expensemanager.entity.Account;
 import dev.vishal.expensemanager.entity.Category;
+import dev.vishal.expensemanager.entity.LogicalTransaction;
 import dev.vishal.expensemanager.entity.Transaction;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -33,12 +34,13 @@ public class TransactionDaoImpl implements TransactionDao {
         CriteriaQuery<TransactionResponseDto> criteriaQuery = criteriaBuilder.createQuery(TransactionResponseDto.class);
 
         Root<Transaction> transactionRoot = criteriaQuery.from(Transaction.class);
+        Root<LogicalTransaction> logicalTransactionRoot = criteriaQuery.from(LogicalTransaction.class);
         Root<Account> bankAccountRoot = criteriaQuery.from(Account.class);
         Root<Category> categoryRoot = criteriaQuery.from(Category.class);
 
         criteriaQuery.select(criteriaBuilder.construct(
                 TransactionResponseDto.class,
-                transactionRoot.get("id"),
+                logicalTransactionRoot.get("id"),
                 transactionRoot.get("amount"),
                 transactionRoot.get("note"),
                 transactionRoot.get("transactionType"),
@@ -47,13 +49,14 @@ public class TransactionDaoImpl implements TransactionDao {
                 bankAccountRoot.get("name"),
                 categoryRoot.get("id"),
                 categoryRoot.get("name"),
-                transactionRoot.get("lastTransactionId"),
+                transactionRoot.get("id"),
                 transactionRoot.get("createdOn"),
                 transactionRoot.get("updatedOn")
         ));
 
         List<Predicate> predicates = new ArrayList<>();
 
+        predicates.add(criteriaBuilder.equal(logicalTransactionRoot.get("transactionId"), transactionRoot.get("id")));
         predicates.add(criteriaBuilder.equal(transactionRoot.get("accountId"), bankAccountRoot.get("id")));
         predicates.add(criteriaBuilder.equal(transactionRoot.get("categoryId"), categoryRoot.get("id")));
         predicates.add(criteriaBuilder.equal(transactionRoot.get("isDeleted"), false));
@@ -109,4 +112,32 @@ public class TransactionDaoImpl implements TransactionDao {
 
         return query.getResultList();
     }
+
+    @Override
+    public List<String> findNotes(TransactionDto transactionDto) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<String> criteriaQuery = criteriaBuilder.createQuery(String.class);
+
+        Root<Transaction> transactionRoot = criteriaQuery.from(Transaction.class);
+        Root<LogicalTransaction> logicalTransactionRoot = criteriaQuery.from(LogicalTransaction.class);
+
+        Predicate joinCondition = criteriaBuilder.equal(logicalTransactionRoot.get("transactionId"), transactionRoot.get("id"));
+        Predicate notDeleted = criteriaBuilder.equal(logicalTransactionRoot.get("isDeleted"), false);
+        Predicate noteLike = criteriaBuilder.like(
+                criteriaBuilder.lower(transactionRoot.get("note")),
+                "%" + transactionDto.getNoteLike().toLowerCase() + "%"
+        );
+
+        // select note only
+        criteriaQuery.select(transactionRoot.get("note"))
+                .where(criteriaBuilder.and(joinCondition, notDeleted, noteLike))
+                .groupBy(transactionRoot.get("note")) // ensures uniqueness
+                .orderBy(criteriaBuilder.desc(criteriaBuilder.count(transactionRoot.get("note")))); // most frequent first
+
+        TypedQuery<String> query = entityManager.createQuery(criteriaQuery);
+        query.setMaxResults(15);
+
+        return query.getResultList();
+    }
+
 }

@@ -2,6 +2,7 @@ package dev.vishal.expensemanager.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,14 +14,15 @@ import java.util.UUID;
 public class Transaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator(style = UuidGenerator.Style.TIME)
+    @Column(columnDefinition = "uuid")
+    private UUID id;
 
-//    @Column(name = "logical_transaction_id", columnDefinition = "uuid", nullable = false)
-//    private UUID logicalTransactionId;
-//
-//    @Column(name = "version_number", nullable = false)
-//    private Long versionNumber;
+    @Column(name = "logical_transaction_id", columnDefinition = "uuid")
+    private UUID logicalTransactionId;
+
+    @Column(name = "version_number", nullable = false)
+    private Long versionNumber;
 
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
@@ -31,11 +33,9 @@ public class Transaction {
     @Column(name = "transaction_type", nullable = false)
     private String transactionType;
 
-    //to be removed
     @Column(name = "account_id", nullable = false)
     private Long accountId;
 
-    //to be removed
     @Column(name = "category_id", nullable = false)
     private Long categoryId;
 
@@ -50,10 +50,6 @@ public class Transaction {
 
     @Column(name = "is_deleted")
     private Boolean isDeleted;
-
-    //to be removed
-    @Column(name = "last_transaction_id")
-    private Long lastTransactionId;
 
     @Transient
     private transient String accountName;

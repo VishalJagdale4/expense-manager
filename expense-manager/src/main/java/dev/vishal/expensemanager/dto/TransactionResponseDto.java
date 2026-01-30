@@ -5,11 +5,12 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 public class TransactionResponseDto {
-    private Long id;
+    private UUID id;
     private BigDecimal amount;
     private String note;
     private String transactionType;
@@ -18,7 +19,7 @@ public class TransactionResponseDto {
     private String accountName;
     private Long categoryId;
     private String categoryName;
-    private Long lastTransactionId;
+    private UUID transactionId;
     private LocalDateTime createdOn;
     private LocalDateTime updatedOn;
 }

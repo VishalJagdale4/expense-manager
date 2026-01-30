@@ -5,10 +5,11 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class TransactionDto {
-    private Long id;
+    private UUID id;
     private BigDecimal amount;
     private String note;
     private String transactionType;
@@ -17,8 +18,7 @@ public class TransactionDto {
     private LocalDateTime transactionDatetime;
     private LocalDateTime createdOn;
     private LocalDateTime updatedOn;
-    private Boolean deleted;
-    private Long lastTransactionId;
+    private Boolean isDeleted;
 
     // For filters
     private String noteLike;
