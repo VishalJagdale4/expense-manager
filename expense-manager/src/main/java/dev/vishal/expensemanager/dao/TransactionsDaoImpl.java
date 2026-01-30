@@ -5,7 +5,7 @@ import dev.vishal.expensemanager.dto.TransactionResponseDto;
 import dev.vishal.expensemanager.entity.Account;
 import dev.vishal.expensemanager.entity.Category;
 import dev.vishal.expensemanager.entity.LogicalTransaction;
-import dev.vishal.expensemanager.entity.Transaction;
+import dev.vishal.expensemanager.entity.Transactions;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Repository
-public class TransactionDaoImpl implements TransactionDao {
+public class TransactionsDaoImpl implements TransactionsDao {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -33,7 +33,7 @@ public class TransactionDaoImpl implements TransactionDao {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<TransactionResponseDto> criteriaQuery = criteriaBuilder.createQuery(TransactionResponseDto.class);
 
-        Root<Transaction> transactionRoot = criteriaQuery.from(Transaction.class);
+        Root<Transactions> transactionRoot = criteriaQuery.from(Transactions.class);
         Root<LogicalTransaction> logicalTransactionRoot = criteriaQuery.from(LogicalTransaction.class);
         Root<Account> bankAccountRoot = criteriaQuery.from(Account.class);
         Root<Category> categoryRoot = criteriaQuery.from(Category.class);
@@ -118,7 +118,7 @@ public class TransactionDaoImpl implements TransactionDao {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<String> criteriaQuery = criteriaBuilder.createQuery(String.class);
 
-        Root<Transaction> transactionRoot = criteriaQuery.from(Transaction.class);
+        Root<Transactions> transactionRoot = criteriaQuery.from(Transactions.class);
         Root<LogicalTransaction> logicalTransactionRoot = criteriaQuery.from(LogicalTransaction.class);
 
         Predicate joinCondition = criteriaBuilder.equal(logicalTransactionRoot.get("transactionId"), transactionRoot.get("id"));

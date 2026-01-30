@@ -5,7 +5,7 @@ import dev.vishal.expensemanager.dto.TransactionResponseDto;
 
 import java.util.List;
 
-public interface TransactionDao {
+public interface TransactionsDao {
     List<TransactionResponseDto> findTransactions(TransactionDto transactionDto);
 
     List<String> findNotes(TransactionDto transactionDto);

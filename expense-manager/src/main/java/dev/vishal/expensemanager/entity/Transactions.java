@@ -10,8 +10,8 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "Transaction")
-public class Transaction {
+@Table(name = "transactions")
+public class Transactions {
 
     @Id
     @UuidGenerator(style = UuidGenerator.Style.TIME)

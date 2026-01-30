@@ -2,19 +2,18 @@ package dev.vishal.expensemanager.service;
 
 import dev.vishal.expensemanager.dto.TransactionDto;
 import dev.vishal.expensemanager.dto.TransactionResponseDto;
-import dev.vishal.expensemanager.entity.Transaction;
+import dev.vishal.expensemanager.entity.Transactions;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface TransactionService {
 
-    Transaction createTransaction(TransactionDto dto);
+    Transactions createTransaction(TransactionDto dto);
 
-    Transaction updateTransaction(TransactionDto dto);
+    Transactions updateTransaction(TransactionDto dto);
 
-    Transaction getTransaction(UUID id);
+    Transactions getTransaction(UUID id);
 
     List<TransactionResponseDto> getAllTransactions(TransactionDto dto);
 
