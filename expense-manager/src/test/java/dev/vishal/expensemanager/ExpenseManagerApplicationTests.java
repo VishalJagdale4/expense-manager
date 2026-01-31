@@ -1,4 +1,4 @@
-package dev.vishal.expense_manager;
+package dev.vishal.expensemanager;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

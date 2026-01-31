@@ -1,6 +1,6 @@
 package dev.vishal.expensemanager.service;
 
-import dev.vishal.expensemanager.common.exception.BadRequestException;
+import dev.commonlib.exceptionutils.exceptions.BadRequestException;
 import dev.vishal.expensemanager.dto.AccountDto;
 import dev.vishal.expensemanager.entity.Account;
 import dev.vishal.expensemanager.repository.AccountRepository;
