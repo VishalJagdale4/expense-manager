@@ -1,10 +1,10 @@
 package dev.vishal.expensemanager.controller;
 
-import dev.vishal.expensemanager.common.exception.BadRequestException;
-import dev.vishal.expensemanager.common.utils.ResponseDTO;
-import dev.vishal.expensemanager.common.utils.ResponseUtil;
+import dev.commonlib.exceptionutils.exceptions.BadRequestException;
 import dev.vishal.expensemanager.dto.AccountDto;
 import dev.vishal.expensemanager.service.AccountService;
+import dev.commonlib.responseutils.ResponseUtil;
+import dev.commonlib.responseutils.model.ResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

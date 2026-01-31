@@ -1,9 +1,8 @@
-package dev.vishal.expensemanager.common.utils;
+package dev.commonlib.responseutils.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
@@ -12,11 +11,15 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseDTO {
     private LocalDateTime landingTime;
-    private LocalDateTime processingTime;
-    private Object data;
+    private LocalDateTime responseTime;
     private String status;
     private int statusCode;
     private String endpoint;
+
+    // Success
+    private Object data;
+
+    // Error
     private String errorMessage;
-    private String exceptionMessage;
+    private String errorCode;
 }

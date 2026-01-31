@@ -8,24 +8,11 @@
         <version>4.0.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>dev.vishal</groupId>
-    <artifactId>expense-manager</artifactId>
+    <groupId>dev.commonlib</groupId>
+    <artifactId>common-lib</artifactId>
     <version>1.0.0</version>
-    <name>Expense Manager</name>
-    <description>It manages expenses or transactions of user</description>
-    <url/>
-    <licenses>
-        <license/>
-    </licenses>
-    <developers>
-        <developer/>
-    </developers>
-    <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
-    </scm>
+    <name>common-lib</name>
+    <description>It is common library and utility for all service</description>
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -70,21 +57,6 @@
             <version>7.4</version>
         </dependency>
 
-        <dependency>
-            <groupId>dev.commonlib</groupId>
-            <artifactId>common-lib</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

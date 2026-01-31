@@ -3,7 +3,6 @@ package dev.vishal.expensemanager.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
