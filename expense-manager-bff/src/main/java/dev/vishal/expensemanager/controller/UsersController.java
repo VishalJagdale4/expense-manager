@@ -1,0 +1,90 @@
+package dev.vishal.expensemanager.controller;
+
+import dev.common.exceptionutils.exceptions.BadRequestException;
+import dev.common.responseutils.ResponseUtil;
+import dev.common.responseutils.model.ResponseDTO;
+import dev.vishal.expensemanager.client.ExpenseManagerCoreClient;
+import dev.vishal.expensemanager.dto.UserDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/users")
+@RequiredArgsConstructor
+@Validated
+public class UsersController {
+
+    private final ExpenseManagerCoreClient expenseManagerCoreClient;
+
+    @PostMapping("/createUser")
+    public ResponseEntity<ResponseDTO> createUser(@RequestBody UserDto dto) throws BadRequestException {
+        LocalDateTime landingTime = LocalDateTime.now();
+        String endPoint = "/createUser";
+
+        if (!StringUtils.hasText(dto.getFirstName())) {
+            throw new BadRequestException("First Name is mandatory!");
+        }
+
+        if (!StringUtils.hasText(dto.getLastName())) {
+            throw new BadRequestException("Last Name is mandatory!");
+        }
+
+        if (!StringUtils.hasText(dto.getEmail())) {
+            throw new BadRequestException("Email is mandatory!");
+        }
+
+        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.createUser(dto));
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
+    }
+
+    @PutMapping("/updateUser")
+    public ResponseEntity<ResponseDTO> updateUser(@RequestBody UserDto dto) throws BadRequestException {
+        LocalDateTime landingTime = LocalDateTime.now();
+        String endPoint = "/updateUser";
+
+        if (Objects.isNull(dto.getFirstName())) {
+            throw new BadRequestException("First Name is mandatory!");
+        }
+
+        if (Objects.isNull(dto.getLastName())) {
+            throw new BadRequestException("Last Name is mandatory!");
+        }
+
+        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.updateUser(dto));
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
+    }
+
+    @GetMapping("/getUser/{id}")
+    public ResponseEntity<ResponseDTO> getUser(@PathVariable UUID id) throws BadRequestException {
+        LocalDateTime landingTime = LocalDateTime.now();
+        String endPoint = "/getUser";
+
+        if (Objects.isNull(id)) {
+            throw new BadRequestException("Id is mandatory!");
+        }
+
+        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getUser(id));
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
+    }
+
+    @DeleteMapping("/deleteUser/{id}")
+    public ResponseEntity<ResponseDTO> deleteUser(@PathVariable UUID id) throws BadRequestException {
+        LocalDateTime landingTime = LocalDateTime.now();
+        String endPoint = "/deleteUser";
+
+        if (Objects.isNull(id)) {
+            throw new BadRequestException("Id is mandatory!");
+        }
+
+        expenseManagerCoreClient.deleteUser(id);
+        return ResponseUtil.sendResponse(id, landingTime, HttpStatus.OK, endPoint);
+    }
+}

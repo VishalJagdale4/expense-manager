@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>e-Xpense Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+          background: #f2f4f8;
+        }
+        .app-header {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background: white;
+          border-bottom: 1px solid #eaeaea;
+        }
+        .card {
+          border-radius: 16px;
+        }
+        .section-title {
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: #555;
+        }
+        .account-card i {
+          font-size: 1.6rem;
+        }
+        .floating-btn {
+          position: fixed;
+          right: 18px;
+          bottom: 18px;
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          font-size: 34px;
+          box-shadow: 0 10px 25px rgba(0,0,0,.25);
+          z-index: 999;
+        }
+        canvas {
+          max-height: 280px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Header -->
+<div class="app-header p-3">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-wallet2 fs-3 text-primary me-2"></i>
+        <strong class="fs-5">e-Xpense Manager</strong>
+    </div>
+</div>
+
+<div class="container py-3">
+
+    <!-- Accounts -->
+    <div class="mb-4">
+        <div class="section-title mb-2"><i class="bi bi-bank me-1"></i>Bank Accounts</div>
+        <div class="row g-2">
+            <div class="col-6 col-md-3">
+                <div class="card p-3 account-card">
+                    <i class="bi bi-bank text-primary"></i>
+                    <div class="small text-muted">HDFC</div>
+                    <strong>₹45,000</strong>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card p-3 account-card">
+                    <i class="bi bi-credit-card text-success"></i>
+                    <div class="small text-muted">ICICI</div>
+                    <strong>₹28,300</strong>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card p-3 account-card">
+                    <i class="bi bi-piggy-bank text-warning"></i>
+                    <div class="small text-muted">SBI</div>
+                    <strong>₹12,800</strong>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card p-3 account-card">
+                    <i class="bi bi-wallet text-danger"></i>
+                    <div class="small text-muted">Cash</div>
+                    <strong>₹3,200</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="section-title mb-2">
+                <i class="bi bi-clock-history me-1"></i>Last 7 Transactions
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <tbody>
+                    <tr>
+                        <td>🍔 Food</td>
+                        <td>HDFC</td>
+                        <td>-₹250</td>
+                        <td class="text-muted">10:30 AM</td>
+                    </tr>
+                    <tr>
+                        <td>⛽ Fuel</td>
+                        <td>ICICI</td>
+                        <td>-₹1,500</td>
+                        <td class="text-muted">9:15 AM</td>
+                    </tr>
+                    <tr>
+                        <td>💼 Salary</td>
+                        <td>SBI</td>
+                        <td class="text-success">+₹50,000</td>
+                        <td class="text-muted">Yesterday</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Balance Trend -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="section-title mb-2">
+                <i class="bi bi-graph-up-arrow me-1"></i>Balance Trend
+            </div>
+            <canvas id="balanceTrend"></canvas>
+        </div>
+    </div>
+
+    <!-- Category Pie (Today) -->
+    <div class="card mb-4 text-center">
+        <div class="card-body">
+            <div class="section-title mb-2">
+                <i class="bi bi-pie-chart me-1"></i>Today's Expenses
+            </div>
+            <canvas id="todayPie"></canvas>
+            <div class="mt-3">
+                <strong>Total: ₹<span id="todayTotal">3,250</span></strong>
+                <div class="small text-muted">Tap a slice to filter</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Expense Bars -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="section-title mb-2">
+                <i class="bi bi-bar-chart me-1"></i>Daily Expenses
+            </div>
+            <canvas id="dailyBar"></canvas>
+        </div>
+    </div>
+
+    <!-- Top Expenses -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="section-title mb-2">
+                <i class="bi bi-trophy me-1"></i>Top 5 Expenses
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">Rent <span>₹8,000</span></li>
+                <li class="list-group-item d-flex justify-content-between">Shopping <span>₹3,200</span></li>
+                <li class="list-group-item d-flex justify-content-between">Fuel <span>₹1,500</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Account Wise Balance -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="section-title mb-2">
+                <i class="bi bi-wallet-fill me-1"></i>Total Balance: ₹89,300
+            </div>
+            <canvas id="accountBar"></canvas>
+        </div>
+    </div>
+
+    <!-- Monthly Pie -->
+    <div class="card mb-5 text-center">
+        <div class="card-body">
+            <div class="section-title mb-2">
+                <i class="bi bi-calendar-month me-1"></i>Monthly Category Split
+            </div>
+            <canvas id="monthPie"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<!-- Floating Add -->
+<button class="btn btn-primary floating-btn">
+    <i class="bi bi-plus"></i>
+</button>
+
+<script>
+    new Chart(balanceTrend, {
+      type: 'line',
+      data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets: [{
+          data: [80000,82000,79000,81000,87000,89000,89300],
+          borderColor:'#0d6efd',
+          tension:.4,
+          fill:false
+        }]
+      }
+    });
+
+    const todayData = [1200,800,600,650];
+    const todayLabels = ['Food','Fuel','Shopping','Bills'];
+
+    new Chart(todayPie, {
+      type:'pie',
+      data:{
+        labels: todayLabels,
+        datasets:[{data: todayData}]
+      },
+      options:{
+        onClick:(e,el)=>{
+          if(el.length){
+            document.getElementById('todayTotal').innerText =
+              todayData[el[0].index];
+          }
+        }
+      }
+    });
+
+    new Chart(dailyBar, {
+      type:'bar',
+      data:{
+        labels:['Mon','Tue','Wed','Thu','Fri'],
+        datasets:[{data:[500,1200,800,1500,950], backgroundColor:'#6f42c1'}]
+      }
+    });
+
+    new Chart(accountBar, {
+      type:'bar',
+      data:{
+        labels:['HDFC','ICICI','SBI','Cash'],
+        datasets:[{data:[45000,28300,12800,3200], backgroundColor:'#20c997'}]
+      }
+    });
+
+    new Chart(monthPie, {
+      type:'pie',
+      data:{
+        labels: todayLabels,
+        datasets:[{data:[8200,5400,7600,4300]}]
+      }
+    });
+</script>
+
+</body>
+</html>
