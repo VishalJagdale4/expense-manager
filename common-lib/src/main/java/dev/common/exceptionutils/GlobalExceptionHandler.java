@@ -6,8 +6,10 @@ import dev.common.responseutils.model.ResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -73,5 +75,34 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ResponseDTO> handleValidationException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+
+        log.warn(
+                "{}} | URI: {} | Method: {}",
+                ex.getMessage(),
+                request.getRequestURI(),
+                request.getMethod(),
+                ex
+        );
+
+        String errorMessage = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .findFirst()  // get the first field error
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .orElse("Some field is invalid");
+
+        return ResponseUtil.sendErrorResponse(
+                errorMessage,
+                HttpStatus.BAD_REQUEST.name(),
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
+    }
+
 }
 
