@@ -10,4 +10,8 @@ public class UnauthorizedException extends CommonException {
         super(message, HttpStatus.UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name());
     }
 
+    public UnauthorizedException(String message, String errorCode) {
+        super(message, HttpStatus.UNAUTHORIZED, errorCode);
+    }
+
 }

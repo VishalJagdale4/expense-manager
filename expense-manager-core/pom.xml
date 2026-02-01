@@ -71,7 +71,7 @@
         </dependency>
 
         <dependency>
-            <groupId>dev.commonlib</groupId>
+            <groupId>dev.common</groupId>
             <artifactId>common-lib</artifactId>
             <version>1.0.0</version>
         </dependency>
