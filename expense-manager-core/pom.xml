@@ -72,7 +72,7 @@
 
         <dependency>
             <groupId>dev.common</groupId>
-            <artifactId>common-lib</artifactId>
+            <artifactId>common-core</artifactId>
             <version>1.0.0</version>
         </dependency>
 
