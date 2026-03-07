@@ -1,4 +1,4 @@
-package dev.vishal.expensemanager.dto;
+package dev.vishal.auth.model;
 
 import lombok.Data;
 

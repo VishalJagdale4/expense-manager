@@ -1,4 +1,4 @@
-package dev.vishal.expensemanager.entity;
+package dev.vishal.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -25,6 +25,9 @@ public class Users {
 
     @Column(name = "email", nullable = false)
     private String email;
+
+    @Column(name = "password", nullable = false)
+    private String password;
 
     @Column(name = "created_on", nullable = false)
     private LocalDateTime createdOn;
