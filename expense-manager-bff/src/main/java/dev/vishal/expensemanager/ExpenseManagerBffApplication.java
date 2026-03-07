@@ -11,5 +11,4 @@ public class ExpenseManagerBffApplication {
     public static void main(String[] args) {
         SpringApplication.run(ExpenseManagerBffApplication.class, args);
     }
-
 }
