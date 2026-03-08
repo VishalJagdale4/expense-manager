@@ -56,6 +56,7 @@ public class TransactionsDaoImpl implements TransactionsDao {
 
         List<Predicate> predicates = new ArrayList<>();
 
+        predicates.add(criteriaBuilder.equal(logicalTransactionRoot.get("userId"), dto.getUserId()));
         predicates.add(criteriaBuilder.equal(logicalTransactionRoot.get("transactionId"), transactionRoot.get("id")));
         predicates.add(criteriaBuilder.equal(transactionRoot.get("accountId"), bankAccountRoot.get("id")));
         predicates.add(criteriaBuilder.equal(transactionRoot.get("categoryId"), categoryRoot.get("id")));
@@ -121,7 +122,10 @@ public class TransactionsDaoImpl implements TransactionsDao {
         Root<Transactions> transactionRoot = criteriaQuery.from(Transactions.class);
         Root<LogicalTransaction> logicalTransactionRoot = criteriaQuery.from(LogicalTransaction.class);
 
-        Predicate joinCondition = criteriaBuilder.equal(logicalTransactionRoot.get("transactionId"), transactionRoot.get("id"));
+        Predicate userIdCondition =
+                criteriaBuilder.equal(logicalTransactionRoot.get("userId"), transactionDto.getUserId());
+        Predicate joinCondition =
+                criteriaBuilder.equal(logicalTransactionRoot.get("transactionId"), transactionRoot.get("id"));
         Predicate notDeleted = criteriaBuilder.equal(logicalTransactionRoot.get("isDeleted"), false);
         Predicate noteLike = criteriaBuilder.like(
                 criteriaBuilder.lower(transactionRoot.get("note")),
@@ -130,7 +134,7 @@ public class TransactionsDaoImpl implements TransactionsDao {
 
         // select note only
         criteriaQuery.select(transactionRoot.get("note"))
-                .where(criteriaBuilder.and(joinCondition, notDeleted, noteLike))
+                .where(criteriaBuilder.and(userIdCondition, joinCondition, notDeleted, noteLike))
                 .groupBy(transactionRoot.get("note")) // ensures uniqueness
                 .orderBy(criteriaBuilder.desc(criteriaBuilder.count(transactionRoot.get("note")))); // most frequent first
 

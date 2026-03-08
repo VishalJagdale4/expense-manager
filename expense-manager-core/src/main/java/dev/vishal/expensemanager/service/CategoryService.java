@@ -5,6 +5,7 @@ import dev.vishal.expensemanager.dto.CategoryDto;
 import dev.vishal.expensemanager.entity.Category;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface CategoryService {
 
@@ -12,11 +13,11 @@ public interface CategoryService {
 
     Category updateCategory(CategoryDto dto) throws BadRequestException;
 
-    Category getCategory(Long id) throws BadRequestException;
+    Category getCategory(Long id, UUID userId) throws BadRequestException;
 
-    List<Category> getCategoryByParent(Long id) throws BadRequestException;
+    List<Category> getCategoryByParent(Long id, UUID userId) throws BadRequestException;
 
-    List<Category> getAllCategories();
+    List<Category> getAllCategories(UUID userId);
 
-    void deleteCategory(Long id) throws BadRequestException;
+    void deleteCategory(Long id, UUID userId) throws BadRequestException;
 }

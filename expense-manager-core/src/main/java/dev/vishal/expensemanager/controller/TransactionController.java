@@ -32,6 +32,10 @@ public class TransactionController {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/createTransaction";
 
+        if (Objects.isNull(dto.getUserId())) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
+
         if (Objects.isNull(dto.getAmount())) {
             throw new BadRequestException("Amount is mandatory!");
         }
@@ -44,7 +48,7 @@ public class TransactionController {
             throw new BadRequestException("Note is mandatory!");
         }
 
-        if (Objects.isNull(dto.getTransactionType())) {
+        if (!StringUtils.hasText(dto.getTransactionType())) {
             throw new BadRequestException("Transaction type is mandatory!");
         }
 
@@ -60,7 +64,8 @@ public class TransactionController {
             throw new BadRequestException("Transaction datetime is mandatory!");
         }
 
-        return ResponseUtil.sendResponse(transactionService.createTransaction(dto), landingTime, HttpStatus.OK, endPoint);
+        return ResponseUtil.sendResponse(
+                transactionService.createTransaction(dto), landingTime, HttpStatus.OK, endPoint);
     }
 
     @PutMapping("/updateTransaction")
@@ -72,6 +77,10 @@ public class TransactionController {
             throw new BadRequestException("Id is mandatory!");
         }
 
+        if (Objects.isNull(dto.getUserId())) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
+
         if (Objects.isNull(dto.getAmount())) {
             throw new BadRequestException("Amount is mandatory!");
         }
@@ -80,7 +89,7 @@ public class TransactionController {
             throw new BadRequestException("Note is mandatory!");
         }
 
-        if (Objects.isNull(dto.getTransactionType())) {
+        if (!StringUtils.hasText(dto.getTransactionType())) {
             throw new BadRequestException("Transaction type is mandatory!");
         }
 
@@ -96,11 +105,12 @@ public class TransactionController {
             throw new BadRequestException("Transaction datetime is mandatory!");
         }
 
-        return ResponseUtil.sendResponse(transactionService.updateTransaction(dto), landingTime, HttpStatus.OK, endPoint);
+        return ResponseUtil.sendResponse(
+                transactionService.updateTransaction(dto), landingTime, HttpStatus.OK, endPoint);
     }
 
-    @GetMapping("/getTransaction/{id}")
-    public ResponseEntity<ResponseDTO> getTransaction(@PathVariable UUID id) {
+    @GetMapping("/getTransaction/{userId}/{id}")
+    public ResponseEntity<ResponseDTO> getTransaction(@PathVariable UUID id, @PathVariable UUID userId) {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/getTransaction";
 
@@ -108,7 +118,12 @@ public class TransactionController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        return ResponseUtil.sendResponse(transactionService.getTransaction(id), landingTime, HttpStatus.OK, endPoint);
+        if (Objects.isNull(userId)) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
+
+        return ResponseUtil.sendResponse(
+                transactionService.getTransaction(id, userId), landingTime, HttpStatus.OK, endPoint);
     }
 
     @PostMapping("/getAllTransactions")
@@ -116,13 +131,22 @@ public class TransactionController {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/getAllTransactions";
 
-        return ResponseUtil.sendResponse(transactionService.getAllTransactions(dto), landingTime, HttpStatus.OK, endPoint);
+        if (Objects.isNull(dto.getUserId())) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
+
+        return ResponseUtil.sendResponse(
+                transactionService.getAllTransactions(dto), landingTime, HttpStatus.OK, endPoint);
     }
 
     @PostMapping("/getTransactionNotes")
     public ResponseEntity<ResponseDTO> getTransactionNotes(@RequestBody TransactionDto dto) {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/getTransactionNotes";
+
+        if (Objects.isNull(dto.getUserId())) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
 
         List<String> notes = new ArrayList<>();
 
@@ -134,16 +158,20 @@ public class TransactionController {
         return ResponseUtil.sendResponse(notes, landingTime, HttpStatus.OK, endPoint);
     }
 
-    @DeleteMapping("/deleteTransaction/{id}")
-    public ResponseEntity<ResponseDTO> deleteTransaction(@PathVariable UUID id) {
+    @DeleteMapping("/deleteTransaction/{userId}/{id}")
+    public ResponseEntity<ResponseDTO> deleteTransaction(@PathVariable UUID id, @PathVariable UUID userId) {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/deleteTransaction";
+
+        if (Objects.isNull(userId)) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
 
         if (Objects.isNull(id)) {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        transactionService.deleteTransaction(id);
+        transactionService.deleteTransaction(id, userId);
         return ResponseUtil.sendResponse(id, landingTime, HttpStatus.OK, endPoint);
     }
 }

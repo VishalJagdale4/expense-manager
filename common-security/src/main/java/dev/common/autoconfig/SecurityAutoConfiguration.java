@@ -30,7 +30,7 @@ public class SecurityAutoConfiguration {
     public JwtAuthenticationFilter jwtAuthenticationFilter(
             JwtValidationService jwtValidationService) {
 
-        return new JwtAuthenticationFilter(jwtValidationService);
+        return new JwtAuthenticationFilter(jwtValidationService, properties);
     }
 
     @Bean

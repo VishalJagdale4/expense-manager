@@ -8,11 +8,13 @@ import dev.vishal.expensemanager.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/category")
@@ -27,7 +29,11 @@ public class CategoryController {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/createCategory";
 
-        if (Objects.isNull(dto.getName())) {
+        if (Objects.isNull(dto.getUserId())) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
+
+        if (!StringUtils.hasText(dto.getName())) {
             throw new BadRequestException("Name is mandatory!");
         }
 
@@ -43,7 +49,11 @@ public class CategoryController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        if (Objects.isNull(dto.getName())) {
+        if (Objects.isNull(dto.getUserId())) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
+
+        if (!StringUtils.hasText(dto.getName())) {
             throw new BadRequestException("Name is mandatory!");
         }
 
@@ -54,8 +64,10 @@ public class CategoryController {
         return ResponseUtil.sendResponse(categoryService.updateCategory(dto), landingTime, HttpStatus.OK, endPoint);
     }
 
-    @GetMapping("/getCategory/{id}")
-    public ResponseEntity<ResponseDTO> getCategory(@PathVariable Long id) throws BadRequestException {
+    @GetMapping("/getCategory/{userId}/{id}")
+    public ResponseEntity<ResponseDTO> getCategory(
+            @PathVariable Long id,
+            @PathVariable UUID userId) throws BadRequestException {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/getCategory";
 
@@ -63,11 +75,18 @@ public class CategoryController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        return ResponseUtil.sendResponse(categoryService.getCategory(id), landingTime, HttpStatus.OK, endPoint);
+        if (Objects.isNull(userId)) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
+
+        return ResponseUtil.sendResponse(
+                categoryService.getCategory(id, userId), landingTime, HttpStatus.OK, endPoint);
     }
 
-    @GetMapping("/getCategoryByParent/{id}")
-    public ResponseEntity<ResponseDTO> getCategoryByParent(@PathVariable Long id) throws BadRequestException {
+    @GetMapping("/getCategoryByParent/{userId}/{id}")
+    public ResponseEntity<ResponseDTO> getCategoryByParent(
+            @PathVariable Long id,
+            @PathVariable UUID userId) throws BadRequestException {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/getCategoryByParent";
 
@@ -75,19 +94,31 @@ public class CategoryController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        return ResponseUtil.sendResponse(categoryService.getCategoryByParent(id), landingTime, HttpStatus.OK, endPoint);
+        if (Objects.isNull(userId)) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
+
+        return ResponseUtil.sendResponse(
+                categoryService.getCategoryByParent(id, userId), landingTime, HttpStatus.OK, endPoint);
     }
 
-    @GetMapping("/getAllCategories")
-    public ResponseEntity<ResponseDTO> getAllCategories() throws BadRequestException {
+    @GetMapping("/getAllCategories/{userId}")
+    public ResponseEntity<ResponseDTO> getAllCategories(@PathVariable UUID userId) throws BadRequestException {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/getAllCategories";
 
-        return ResponseUtil.sendResponse(categoryService.getAllCategories(), landingTime, HttpStatus.OK, endPoint);
+        if (Objects.isNull(userId)) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
+
+        return ResponseUtil.sendResponse(
+                categoryService.getAllCategories(userId), landingTime, HttpStatus.OK, endPoint);
     }
 
-    @DeleteMapping("/deleteCategory/{id}")
-    public ResponseEntity<ResponseDTO> deleteCategory(@PathVariable Long id) throws BadRequestException {
+    @DeleteMapping("/deleteCategory/{userId}/{id}")
+    public ResponseEntity<ResponseDTO> deleteCategory(
+            @PathVariable Long id,
+            @PathVariable UUID userId) throws BadRequestException {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/deleteCategory";
 
@@ -95,7 +126,11 @@ public class CategoryController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        categoryService.deleteCategory(id);
+        if (Objects.isNull(userId)) {
+            throw new BadRequestException("User Id is mandatory!");
+        }
+
+        categoryService.deleteCategory(id, userId);
         return ResponseUtil.sendResponse(id, landingTime, HttpStatus.OK, endPoint);
     }
 }

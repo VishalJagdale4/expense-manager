@@ -24,17 +24,21 @@ public interface ExpenseManagerCoreClient {
     @PutMapping("/account/updateAccount")
     ResponseEntity<ResponseDTO> updateAccount(@RequestBody AccountDto dto) throws Exception;
 
-    @GetMapping("/account/getAccount/{id}")
-    ResponseEntity<ResponseDTO> getAccount(@PathVariable Long id) throws BadRequestException;
+    @GetMapping("/account/getAccount/{userId}/{id}")
+    ResponseEntity<ResponseDTO> getAccount(
+            @PathVariable UUID userId,
+            @PathVariable Long id) throws BadRequestException;
 
-    @GetMapping("/account/getAccountByType/{type}")
-    ResponseEntity<ResponseDTO> getAccountByType(@PathVariable String type) throws BadRequestException;
+    @GetMapping("/account/getAccountByType/{userId}/{type}")
+    ResponseEntity<ResponseDTO> getAccountByType(
+            @PathVariable UUID userId,
+            @PathVariable String type) throws BadRequestException;
 
-    @GetMapping("/account/getAllAccounts")
-    ResponseEntity<ResponseDTO> getAllAccounts();
+    @GetMapping("/account/getAllAccounts/{userId}")
+    ResponseEntity<ResponseDTO> getAllAccounts(@PathVariable UUID userId);
 
-    @DeleteMapping("/account/deleteAccount/{id}")
-    void deleteAccount(@PathVariable Long id) throws BadRequestException;
+    @DeleteMapping("/account/deleteAccount/{userId}/{id}")
+    void deleteAccount(@PathVariable Long id, @PathVariable UUID userId) throws BadRequestException;
 
     @PostMapping("/category/createCategory")
     ResponseEntity<ResponseDTO> createCategory(@RequestBody CategoryDto dto) throws BadRequestException;
@@ -42,17 +46,21 @@ public interface ExpenseManagerCoreClient {
     @PutMapping("/category/updateCategory")
     ResponseEntity<ResponseDTO> updateCategory(@RequestBody CategoryDto dto) throws BadRequestException;
 
-    @GetMapping("/category/getCategory/{id}")
-    ResponseEntity<ResponseDTO> getCategory(@PathVariable Long id) throws BadRequestException;
+    @GetMapping("/category/getCategory/{userId}/{id}")
+    ResponseEntity<ResponseDTO> getCategory(
+            @PathVariable UUID userId,
+            @PathVariable Long id) throws BadRequestException;
 
-    @GetMapping("/category/getCategoryByParent/{id}")
-    ResponseEntity<ResponseDTO> getCategoryByParent(@PathVariable Long id) throws BadRequestException;
+    @GetMapping("/category/getCategoryByParent/{userId}/{id}")
+    ResponseEntity<ResponseDTO> getCategoryByParent(
+            @PathVariable UUID userId,
+            @PathVariable Long id) throws BadRequestException;
 
-    @GetMapping("/category/getAllCategories")
-    ResponseEntity<ResponseDTO> getAllCategories();
+    @GetMapping("/category/getAllCategories/{userId}")
+    ResponseEntity<ResponseDTO> getAllCategories(@PathVariable UUID userId);
 
-    @DeleteMapping("/category/deleteCategory/{id}")
-    void deleteCategory(@PathVariable Long id) throws BadRequestException;
+    @DeleteMapping("/category/deleteCategory/{userId}/{id}")
+    void deleteCategory(@PathVariable UUID userId, @PathVariable Long id) throws BadRequestException;
 
     @PostMapping("/transaction/createTransaction")
     ResponseEntity<ResponseDTO> createTransaction(@RequestBody TransactionDto dto);
@@ -60,28 +68,20 @@ public interface ExpenseManagerCoreClient {
     @PutMapping("/transaction/updateTransaction")
     ResponseEntity<ResponseDTO> updateTransaction(@RequestBody TransactionDto dto) throws BadRequestException;
 
-    @GetMapping("/transaction/getTransaction/{id}")
-    ResponseEntity<ResponseDTO> getTransaction(@PathVariable UUID id) throws BadRequestException;
+    @GetMapping("/transaction/getTransaction/{userId}/{id}")
+    ResponseEntity<ResponseDTO> getTransaction(
+            @PathVariable UUID userId,
+            @PathVariable UUID id) throws BadRequestException;
 
     @GetMapping("/transaction/getAllTransactions")
-    ResponseEntity<ResponseDTO> getAllTransactions(@PathVariable TransactionDto dto);
+    ResponseEntity<ResponseDTO> getAllTransactions(@RequestBody TransactionDto dto);
 
     @GetMapping("/transaction/getTransactionNotes")
-    List<String> getTransactionNotes(TransactionDto dto);
+    ResponseEntity<ResponseDTO> getTransactionNotes(TransactionDto dto);
 
-    @DeleteMapping("/transaction/deleteTransaction/{id}")
-    void deleteTransaction(@PathVariable UUID id) throws BadRequestException;
-
-    @PostMapping("/users/createUser")
-    ResponseEntity<ResponseDTO> createUser(@RequestBody UserDto dto);
-
-    @PutMapping("/users/updateUser")
-    ResponseEntity<ResponseDTO> updateUser(@RequestBody UserDto dto);
-
-    @GetMapping("/users/getUser/{id}")
-    ResponseEntity<ResponseDTO> getUser(@PathVariable UUID id) throws BadRequestException;
-
-    @DeleteMapping("/users/deleteUser/{id}")
-    void deleteUser(@PathVariable UUID id) throws BadRequestException;
+    @DeleteMapping("/transaction/deleteTransaction/{userId}/{id}")
+    void deleteTransaction(
+            @PathVariable UUID userId,
+            @PathVariable UUID id) throws BadRequestException;
 
 }

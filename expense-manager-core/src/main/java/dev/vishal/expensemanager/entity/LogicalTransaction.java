@@ -20,6 +20,9 @@ public class LogicalTransaction {
     @Column(name = "transaction_id", columnDefinition = "uuid", nullable = false)
     private UUID transactionId;
 
+    @Column(name = "user_id", columnDefinition = "uuid", nullable = false)
+    private UUID userId;
+
     @Column(name = "created_on", nullable = false)
     private LocalDateTime createdOn;
 

@@ -35,10 +35,12 @@ public class TransactionServiceImpl implements TransactionService {
     public Transactions createTransaction(TransactionDto dto) {
 
         accountRepository.findById(dto.getAccountId())
+                .filter(acc -> acc.getUserId().equals(dto.getUserId()))
                 .filter(acc -> !acc.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Account not found or deleted"));
 
         categoryRepository.findById(dto.getCategoryId())
+                .filter(cat -> cat.getUserId().equals(dto.getUserId()))
                 .filter(cat -> !cat.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Category not found or deleted"));
 
@@ -53,6 +55,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         LogicalTransaction logicalTransaction = new LogicalTransaction();
         logicalTransaction.setTransactionId(transaction.getId());
+        logicalTransaction.setUserId(dto.getUserId());
 
         logicalTransaction = logicalTransactionRepository.save(logicalTransaction);
 
@@ -63,8 +66,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transactions getTransaction(UUID id) {
+    public Transactions getTransaction(UUID id, UUID userId) {
         LogicalTransaction logicalTransaction = logicalTransactionRepository.findById(id)
+                .filter(t -> t.getUserId().equals(userId))
                 .filter(t -> !t.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Transaction not found"));
 
@@ -90,8 +94,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public void deleteTransaction(UUID id) {
+    public void deleteTransaction(UUID id, UUID userId) {
         LogicalTransaction logicalTransaction = logicalTransactionRepository.findById(id)
+                .filter(txn -> txn.getUserId().equals(userId))
                 .filter(txn -> !txn.getIsDeleted())
                 .map(txn -> {
                     txn.setIsDeleted(true);
@@ -105,6 +110,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public Transactions updateTransaction(TransactionDto dto) {
         LogicalTransaction logicalTransaction = logicalTransactionRepository.findById(dto.getId())
+                .filter(txn -> txn.getUserId().equals(dto.getUserId()))
                 .filter(txn -> !txn.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Transaction not found"));
 
@@ -120,10 +126,12 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         accountRepository.findById(dto.getAccountId())
+                .filter(acc -> acc.getUserId().equals(dto.getUserId()))
                 .filter(acc -> !acc.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Account not found"));
 
         categoryRepository.findById(dto.getCategoryId())
+                .filter(cat -> cat.getUserId().equals(dto.getUserId()))
                 .filter(cat -> !cat.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Category not found"));
 
@@ -135,7 +143,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transactions newTransaction = new Transactions();
         copyDtoToEntity(dto, newTransaction);
         newTransaction.setVersionNumber(existing.getVersionNumber() + 1);
-        newTransaction.setLogicalTransactionId(existing.getId());
+        newTransaction.setLogicalTransactionId(logicalTransaction.getId());
 
         Transactions saved = transactionsRepository.save(newTransaction);
 
@@ -158,7 +166,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private boolean isUserInputChanged(Transactions entity, TransactionDto dto) {
-        if (notEquals(entity.getAmount(), dto.getAmount())) return true;
+        if (notEquals(entity.getAmount().abs(), dto.getAmount())) return true;
         if (notEquals(entity.getNote(), dto.getNote())) return true;
         if (notEquals(entity.getTransactionType(), dto.getTransactionType())) return true;
         if (notEquals(entity.getAccountId(), dto.getAccountId())) return true;

@@ -1,5 +1,5 @@
 # JWT Configuration
 jwt:
   secret: ThisIsSpringSecuritySecret256Bit
-  access-token-validity-ms: 90
-  refresh-token-validity-ms: 604800
+  access-token-validity-ms: 900000
+  refresh-token-validity-ms: 604800000

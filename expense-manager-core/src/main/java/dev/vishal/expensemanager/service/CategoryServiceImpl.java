@@ -11,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         if (parentId != null) {
             Category parent = categoryRepository.findById(parentId)
+                    .filter(c -> c.getUserId().equals(dto.getUserId()))
                     .filter(c -> !c.getIsDeleted())
                     .orElseThrow(() -> new BadRequestException("Parent category not found or deleted"));
 
@@ -34,7 +36,8 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         List<Category> existing =
-                categoryRepository.findByNameAndParentCategoryIdAndIsDeletedFalse(
+                categoryRepository.findByUserIdAndNameAndParentCategoryIdAndIsDeletedFalse(
+                        dto.getUserId(),
                         dto.getName(),
                         dto.getParentCategoryId()
                 );
@@ -49,26 +52,27 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category getCategory(Long id) throws BadRequestException {
+    public Category getCategory(Long id, UUID userId) throws BadRequestException {
         return categoryRepository.findById(id)
+                .filter(c -> c.getUserId().equals(userId))
                 .filter(c -> !c.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Category not found"));
     }
 
     @Override
-    public List<Category> getCategoryByParent(Long id) throws BadRequestException {
-        return categoryRepository.findByParentCategoryIdAndIsDeletedFalseOrderByName(id);
+    public List<Category> getCategoryByParent(Long id, UUID userId) throws BadRequestException {
+        return categoryRepository.findByParentCategoryIdAndUserIdAndIsDeletedFalseOrderByName(id, userId);
     }
 
     @Override
-    public List<Category> getAllCategories() {
-        return categoryRepository.findByIsDeletedFalseOrderByName();
+    public List<Category> getAllCategories(UUID userId) {
+        return categoryRepository.findByUserIdAndIsDeletedFalseOrderByName(userId);
     }
 
     @Override
     @Transactional
-    public void deleteCategory(Long id) throws BadRequestException {
-        Category category = categoryRepository.findByIdAndIsDeletedFalse(id);
+    public void deleteCategory(Long id, UUID userId) throws BadRequestException {
+        Category category = categoryRepository.findByIdAndUserIdAndIsDeletedFalse(id, userId);
 
         if (Objects.isNull(category)) {
             throw new BadRequestException("Category not found");
@@ -77,7 +81,8 @@ public class CategoryServiceImpl implements CategoryService {
         category.setIsDeleted(true);
 
         // All child Categories
-        List<Category> categories = categoryRepository.findByParentCategoryIdAndIsDeletedFalseOrderByName(id);
+        List<Category> categories =
+                categoryRepository.findByParentCategoryIdAndUserIdAndIsDeletedFalseOrderByName(id, userId);
         categories.forEach(c -> c.setIsDeleted(true));
 
         categories.add(category);
@@ -91,16 +96,19 @@ public class CategoryServiceImpl implements CategoryService {
 
         if (Objects.nonNull(dto.getParentCategoryId())) {
             categoryRepository.findById(dto.getParentCategoryId())
+                    .filter(category -> category.getUserId().equals(dto.getUserId()))
                     .orElseThrow(() -> new BadRequestException("Parent Category not found"));
         }
 
         Category existing = categoryRepository.findById(dto.getId())
+                .filter(category -> category.getUserId().equals(dto.getUserId()))
                 .filter(category -> !category.getIsDeleted())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
         List<Category> existingDuplicates =
-                categoryRepository.findByIdNotAndNameAndParentCategoryIdAndIsDeletedFalse(
+                categoryRepository.findByIdNotAndUserIdAndNameAndParentCategoryIdAndIsDeletedFalse(
                         dto.getId(),
+                        dto.getUserId(),
                         dto.getName(),
                         dto.getParentCategoryId()
                 );
@@ -116,6 +124,7 @@ public class CategoryServiceImpl implements CategoryService {
     // ------------------ Helper methods ------------------
 
     private void copyDtoToEntity(CategoryDto dto, Category entity) {
+        entity.setUserId(dto.getUserId());
         entity.setName(dto.getName());
         entity.setParentCategoryId(dto.getParentCategoryId());
     }

@@ -13,11 +13,11 @@ public interface TransactionService {
 
     Transactions updateTransaction(TransactionDto dto);
 
-    Transactions getTransaction(UUID id);
+    Transactions getTransaction(UUID id, UUID userId);
 
     List<TransactionResponseDto> getAllTransactions(TransactionDto dto);
 
     List<String> getTransactionNotes(TransactionDto dto);
 
-    void deleteTransaction(UUID id);
+    void deleteTransaction(UUID id, UUID userId);
 }

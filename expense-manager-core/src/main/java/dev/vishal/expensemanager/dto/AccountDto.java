@@ -4,10 +4,12 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 public class AccountDto {
     private Long id;
+    private UUID UserId;
     private String type;
     private String name;
     private BigDecimal balance;
