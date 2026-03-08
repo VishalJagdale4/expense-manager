@@ -5,17 +5,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    Category findByIdAndIsDeletedFalse(Long id);
+    Category findByIdAndUserIdAndIsDeletedFalse(Long id, UUID userId);
 
-    List<Category> findByNameAndParentCategoryIdAndIsDeletedFalse(String name, Long parentCategoryId);
+    List<Category> findByUserIdAndNameAndParentCategoryIdAndIsDeletedFalse(UUID userId, String name, Long parentCategoryId);
 
-    List<Category> findByIdNotAndNameAndParentCategoryIdAndIsDeletedFalse(Long id, String name, Long parentCategoryId);
+    List<Category> findByIdNotAndUserIdAndNameAndParentCategoryIdAndIsDeletedFalse(Long id, UUID userId, String name, Long parentCategoryId);
 
-    List<Category> findByParentCategoryIdAndIsDeletedFalseOrderByName(Long parentCategoryId);
+    List<Category> findByParentCategoryIdAndUserIdAndIsDeletedFalseOrderByName(Long parentCategoryId, UUID userId);
 
-    List<Category> findByIsDeletedFalseOrderByName();
+    List<Category> findByUserIdAndIsDeletedFalseOrderByName(UUID userId);
 }

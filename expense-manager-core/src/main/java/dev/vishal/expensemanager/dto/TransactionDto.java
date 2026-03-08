@@ -10,6 +10,7 @@ import java.util.UUID;
 @Data
 public class TransactionDto {
     private UUID id;
+    private UUID userId;
     private BigDecimal amount;
     private String note;
     private String transactionType;

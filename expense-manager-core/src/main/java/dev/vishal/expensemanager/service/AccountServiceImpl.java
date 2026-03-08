@@ -11,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +23,8 @@ public class AccountServiceImpl implements AccountService {
     public Account createAccount(AccountDto dto) throws BadRequestException {
 
         List<Account> existing =
-                accountRepository.findByNameAndTypeAndIsDeletedFalse(
+                accountRepository.findByUserIdAndNameAndTypeAndIsDeletedFalse(
+                        dto.getUserId(),
                         dto.getName(),
                         dto.getType()
                 );
@@ -38,27 +40,29 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account getAccount(Long id) throws BadRequestException {
+    public Account getAccount(Long id, UUID userId) throws BadRequestException {
         return accountRepository.findById(id)
+                .filter(a -> a.getUserId().equals(userId))
                 .filter(a -> !a.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Account not found"));
     }
 
     @Override
-    public List<Account> getAccountByType(String type) throws BadRequestException {
-        return accountRepository.findByTypeAndIsDeletedFalseOrderByName(type);
+    public List<Account> getAccountByType(UUID userId, String type) throws BadRequestException {
+        return accountRepository.findByUserIdAndTypeAndIsDeletedFalseOrderByName(userId, type);
     }
 
     @Override
-    public List<Account> getAllAccounts() {
-        return accountRepository.findAllByIsDeletedFalseOrderByName();
+    public List<Account> getAllAccounts(UUID userId) {
+        return accountRepository.findAllByUserIdAndIsDeletedFalseOrderByName(userId);
     }
 
     @Override
     @Transactional
-    public void deleteAccount(Long id) throws BadRequestException {
+    public void deleteAccount(Long id, UUID userId) throws BadRequestException {
 
         Account account = accountRepository.findById(id)
+                .filter(acc -> acc.getUserId().equals(userId))
                 .filter(acc -> !acc.getIsDeleted())
                 .map(acc -> {
                     acc.setIsDeleted(true);
@@ -73,12 +77,14 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public Account updateAccount(AccountDto dto) throws BadRequestException {
         Account existing = accountRepository.findById(dto.getId())
+                .filter(Account -> Account.getUserId().equals(dto.getUserId()))
                 .filter(Account -> !Account.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Account not found"));
 
         List<Account> existingDuplicates =
-                accountRepository.findByIdNotAndNameAndTypeAndIsDeletedFalse(
+                accountRepository.findByIdNotAndUserIdAndNameAndTypeAndIsDeletedFalse(
                         dto.getId(),
+                        dto.getUserId(),
                         dto.getName(),
                         dto.getType()
                 );
@@ -93,6 +99,7 @@ public class AccountServiceImpl implements AccountService {
     // ------------------ Helper methods ------------------
 
     private void copyDtoToEntity(AccountDto dto, Account entity) {
+        entity.setUserId(dto.getUserId());
         entity.setName(dto.getName());
         entity.setType(dto.getType());
     }

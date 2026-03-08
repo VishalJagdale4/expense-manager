@@ -1,6 +1,7 @@
 package dev.vishal.expensemanager.controller;
 
 import dev.common.exceptionutils.exceptions.BadRequestException;
+import dev.common.helper.SecurityUtils;
 import dev.common.responseutils.ResponseUtil;
 import dev.common.responseutils.model.ResponseDTO;
 import dev.vishal.expensemanager.client.ExpenseManagerCoreClient;
@@ -60,6 +61,9 @@ public class TransactionController {
             throw new BadRequestException("Transaction datetime is mandatory!");
         }
 
+        // Fetching user id from current user (Security context)
+        dto.setUserId(SecurityUtils.getCurrentUser().getUserId());
+
         Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.createTransaction(dto));
 
         return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
@@ -98,6 +102,9 @@ public class TransactionController {
             throw new BadRequestException("Transaction datetime is mandatory!");
         }
 
+        // Fetching user id from current user (Security context)
+        dto.setUserId(SecurityUtils.getCurrentUser().getUserId());
+
         Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.updateTransaction(dto));
         return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
@@ -111,7 +118,10 @@ public class TransactionController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getTransaction(id));
+        // Fetching user id from current user (Security context)
+        UUID userId = SecurityUtils.getCurrentUser().getUserId();
+
+        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getTransaction(userId, id));
         return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
 
@@ -119,6 +129,9 @@ public class TransactionController {
     public ResponseEntity<ResponseDTO> getAllTransactions(@RequestBody TransactionDto dto) {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/getAllTransactions";
+
+        // Fetching user id from current user (Security context)
+        dto.setUserId(SecurityUtils.getCurrentUser().getUserId());
 
         Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getAllTransactions(dto));
         return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
@@ -129,11 +142,16 @@ public class TransactionController {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/getTransactionNotes";
 
-        List<String> notes = new ArrayList<>();
+
+        Object notes = new ArrayList<>();
 
         if (StringUtils.hasText(dto.getNoteLike())) {
+
+            // Fetching user id from current user (Security context)
+            dto.setUserId(SecurityUtils.getCurrentUser().getUserId());
+
             dto.setNoteLike(dto.getNoteLike().strip());
-            notes = expenseManagerCoreClient.getTransactionNotes(dto);
+            notes = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getTransactionNotes(dto));
         }
 
         return ResponseUtil.sendResponse(notes, landingTime, HttpStatus.OK, endPoint);
@@ -148,7 +166,10 @@ public class TransactionController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        expenseManagerCoreClient.deleteTransaction(id);
+        // Fetching user id from current user (Security context)
+        UUID userId = SecurityUtils.getCurrentUser().getUserId();
+
+        expenseManagerCoreClient.deleteTransaction(userId, id);
         return ResponseUtil.sendResponse(id, landingTime, HttpStatus.OK, endPoint);
     }
 }

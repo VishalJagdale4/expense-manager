@@ -1,6 +1,7 @@
 package dev.vishal.expensemanager.controller;
 
 import dev.common.exceptionutils.exceptions.BadRequestException;
+import dev.common.helper.SecurityUtils;
 import dev.common.responseutils.ResponseUtil;
 import dev.common.responseutils.model.ResponseDTO;
 import dev.vishal.expensemanager.client.ExpenseManagerCoreClient;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/category")
@@ -30,6 +32,9 @@ public class CategoryController {
         if (Objects.isNull(dto.getName())) {
             throw new BadRequestException("Name is mandatory!");
         }
+
+        // Fetching user id from current user (Security context)
+        dto.setUserId(SecurityUtils.getCurrentUser().getUserId());
 
         Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.createCategory(dto));
         return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
@@ -52,6 +57,9 @@ public class CategoryController {
             throw new BadRequestException("Id cannot be same as Parent id!");
         }
 
+        // Fetching user id from current user (Security context)
+        dto.setUserId(SecurityUtils.getCurrentUser().getUserId());
+
         Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.updateCategory(dto));
         return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
@@ -65,7 +73,10 @@ public class CategoryController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getCategory(id));
+        // Fetching user id from current user (Security context)
+        UUID userId = SecurityUtils.getCurrentUser().getUserId();
+
+        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getCategory(userId, id));
         return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
 
@@ -78,7 +89,10 @@ public class CategoryController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getCategoryByParent(id));
+        // Fetching user id from current user (Security context)
+        UUID userId = SecurityUtils.getCurrentUser().getUserId();
+
+        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getCategoryByParent(userId, id));
         return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
 
@@ -87,7 +101,10 @@ public class CategoryController {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/getAllCategories";
 
-        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getAllCategories());
+        // Fetching user id from current user (Security context)
+        UUID userId = SecurityUtils.getCurrentUser().getUserId();
+
+        Object data = ResponseUtil.getDataFromResponse(expenseManagerCoreClient.getAllCategories(userId));
         return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
 
@@ -100,7 +117,10 @@ public class CategoryController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        expenseManagerCoreClient.deleteCategory(id);
+        // Fetching user id from current user (Security context)
+        UUID userId = SecurityUtils.getCurrentUser().getUserId();
+
+        expenseManagerCoreClient.deleteCategory(userId, id);
         return ResponseUtil.sendResponse(id, landingTime, HttpStatus.OK, endPoint);
     }
 }

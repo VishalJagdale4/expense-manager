@@ -28,7 +28,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshTokens refreshToken = new RefreshTokens();
         refreshToken.setUserId(userId);
         refreshToken.setToken(token);
-        refreshToken.setExpiresAt(LocalDateTime.now().plusSeconds(refreshExpirationMs));
+        refreshToken.setExpiresAt(LocalDateTime.now().plusSeconds(refreshExpirationMs / 1000));
         refreshToken.setCreatedOn(LocalDateTime.now());
 
         repository.save(refreshToken);

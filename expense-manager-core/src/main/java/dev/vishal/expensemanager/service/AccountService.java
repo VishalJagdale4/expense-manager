@@ -5,6 +5,7 @@ import dev.vishal.expensemanager.dto.AccountDto;
 import dev.vishal.expensemanager.entity.Account;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface AccountService {
 
@@ -12,11 +13,11 @@ public interface AccountService {
 
     Account updateAccount(AccountDto dto) throws BadRequestException;
 
-    Account getAccount(Long id) throws BadRequestException;
+    Account getAccount(Long id, UUID userId) throws BadRequestException;
 
-    List<Account> getAccountByType(String type) throws BadRequestException;
+    List<Account> getAccountByType(UUID userId, String type) throws BadRequestException;
 
-    List<Account> getAllAccounts();
+    List<Account> getAllAccounts(UUID userId);
 
-    void deleteAccount(Long id) throws BadRequestException;
+    void deleteAccount(Long id, UUID userId) throws BadRequestException;
 }
