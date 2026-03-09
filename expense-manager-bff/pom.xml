@@ -61,12 +61,6 @@
 
         <dependency>
             <groupId>dev.common</groupId>
-            <artifactId>common-core</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.common</groupId>
             <artifactId>common-security</artifactId>
             <version>1.0.0</version>
         </dependency>

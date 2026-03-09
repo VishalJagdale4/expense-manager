@@ -3,6 +3,7 @@ package dev.common.autoconfig;
 import dev.common.exceptionutils.exceptions.InternalServerException;
 import dev.common.feign.CustomFeignErrorDecoder;
 import dev.common.feign.FeignDefaultsProperties;
+import feign.RequestInterceptor;
 import feign.RetryableException;
 import feign.Retryer;
 import feign.codec.ErrorDecoder;
@@ -14,6 +15,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @AutoConfiguration
 
@@ -80,6 +83,19 @@ public class CommonFeignAutoConfiguration {
         public Retryer clone() {
             return new CustomRetryer(period, maxPeriod, maxAttempts);
         }
+    }
+
+    @Bean
+    public RequestInterceptor requestInterceptor() {
+        return requestTemplate -> {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs != null) {
+                String token = attrs.getRequest().getHeader("Authorization");
+                if (token != null) {
+                    requestTemplate.header("Authorization", token);
+                }
+            }
+        };
     }
 }
 

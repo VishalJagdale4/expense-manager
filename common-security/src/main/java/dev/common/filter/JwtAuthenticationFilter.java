@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -22,6 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtValidationService jwtService;
     private final SecurityProperties securityProperties;
+    private final AntPathMatcher matcher = new AntPathMatcher();
 
     @Override
     protected void doFilterInternal(
@@ -32,10 +34,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String uri = request.getRequestURI();
 
-        // Skips JWT validation for permitted URIs
-        if (securityProperties.getPermitAll()
+        boolean skip = securityProperties.getPermitAllUri()
                 .stream()
-                .anyMatch(uri::endsWith)) {
+                .anyMatch(pattern -> matcher.match(pattern, uri));
+
+        // Skips JWT validation for permitted URIs
+        if (skip) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -43,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if (header == null || !header.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
@@ -69,6 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (Exception ex) {
             logger.error("Error while validating request:", ex);
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
