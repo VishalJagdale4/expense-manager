@@ -1,5 +1,6 @@
 package dev.vishal.auth.controller;
 
+import dev.common.exceptionutils.exceptions.BadRequestException;
 import dev.common.exceptionutils.exceptions.UnauthorizedException;
 import dev.common.responseutils.ResponseUtil;
 import dev.common.responseutils.model.ResponseDTO;
@@ -41,7 +42,7 @@ public class AuthController {
         Users user = usersService.getUserByEmail(authRequest.username());
 
         if (!passwordEncoder.matches(authRequest.password(), user.getPassword())) {
-            throw new UnauthorizedException("Invalid credentials");
+            throw new BadRequestException("Invalid credentials");
         }
 
         String accessToken = jwtService.generateToken(user);

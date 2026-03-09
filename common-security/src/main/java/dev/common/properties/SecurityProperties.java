@@ -15,21 +15,42 @@ import java.util.Set;
 @ConfigurationProperties(prefix = "security")
 public class SecurityProperties {
 
-    private List<String> permitAll = new ArrayList<>();
+    private List<String> permitAllUri = new ArrayList<>();
+    private List<String> permitAllEndpoints = new ArrayList<>();
     private final String secret = "ThisIsSpringSecuritySecret256Bit";
 
     @PostConstruct
     public void mergeDefaults() {
-        List<String> defaultUrls = List.of(
+        List<String> defaultUris = List.of(
+                "/expense-manager-bff/users/login",
+                "/expense-manager-bff/users/refresh",
+                "/expense-manager-bff/users/createUser",
+                "/expense-manager-auth/auth/login",
+                "/expense-manager-auth/auth/refresh",
+                "/expense-manager-auth/users/createUser"
+        );
+
+        List<String> defaultEndpoints = List.of(
+                "/users/login",
+                "/users/refresh",
+                "/users/createUser",
                 "/auth/login",
                 "/auth/refresh",
                 "/users/createUser"
         );
 
-        Set<String> merged = new LinkedHashSet<>(defaultUrls);
-        if (permitAll != null) {
-            merged.addAll(permitAll);
+        Set<String> mergedUris = new LinkedHashSet<>(defaultUris);
+        Set<String> mergedEndpoints = new LinkedHashSet<>(defaultEndpoints);
+
+        if (permitAllUri != null) {
+            mergedUris.addAll(permitAllUri);
         }
-        permitAll = new ArrayList<>(merged);
+
+        if (permitAllEndpoints != null) {
+            mergedEndpoints.addAll(permitAllEndpoints);
+        }
+
+        permitAllUri = new ArrayList<>(mergedUris);
+        permitAllEndpoints = new ArrayList<>(mergedEndpoints);
     }
 }

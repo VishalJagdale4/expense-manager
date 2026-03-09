@@ -77,6 +77,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>dev.common</groupId>
+            <artifactId>common-core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>

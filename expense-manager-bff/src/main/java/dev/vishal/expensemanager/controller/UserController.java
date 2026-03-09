@@ -1,12 +1,11 @@
-package dev.vishal.auth.controller;
+package dev.vishal.expensemanager.controller;
 
 import dev.common.exceptionutils.exceptions.BadRequestException;
 import dev.common.responseutils.ResponseUtil;
 import dev.common.responseutils.model.ResponseDTO;
-import dev.vishal.auth.helper.EmailValidator;
-import dev.vishal.auth.helper.PasswordValidator;
-import dev.vishal.auth.model.UserDto;
-import dev.vishal.auth.service.UsersService;
+import dev.vishal.expensemanager.client.ExpenseManagerAuthClient;
+import dev.vishal.expensemanager.dto.AuthRequest;
+import dev.vishal.expensemanager.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +21,8 @@ import java.util.UUID;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Validated
-public class UsersController {
-
-    private final UsersService usersService;
+public class UserController {
+    private final ExpenseManagerAuthClient authClient;
 
     @PostMapping("/createUser")
     public ResponseEntity<ResponseDTO> createUser(@RequestBody UserDto dto) throws BadRequestException {
@@ -39,13 +37,33 @@ public class UsersController {
             throw new BadRequestException("Last Name is mandatory!");
         }
 
-        // Validates email else throws BadRequestException
-        EmailValidator.validateEmail(dto.getEmail());
+        if (!StringUtils.hasText(dto.getEmail())) {
+            throw new BadRequestException("Email is mandatory!");
+        }
 
-        // Validates password else throws BadRequestException
-        PasswordValidator.validatePassword(dto.getPassword());
+        if (!StringUtils.hasText(dto.getPassword())) {
+            throw new BadRequestException("Password is mandatory!");
+        }
 
-        return ResponseUtil.sendResponse(usersService.createUser(dto), landingTime, HttpStatus.OK, endPoint);
+        Object data = ResponseUtil.getDataFromResponse(authClient.createUser(dto));
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ResponseDTO> login(@RequestBody AuthRequest dto) {
+        LocalDateTime landingTime = LocalDateTime.now();
+        String endPoint = "/login";
+
+        if (!StringUtils.hasText(dto.getUsername())) {
+            throw new BadRequestException("Email is mandatory!");
+        }
+
+        if (!StringUtils.hasText(dto.getPassword())) {
+            throw new BadRequestException("Password is mandatory!");
+        }
+
+        Object data = ResponseUtil.getDataFromResponse(authClient.login(dto));
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
 
     @PutMapping("/updateUser")
@@ -65,7 +83,8 @@ public class UsersController {
             throw new BadRequestException("Last Name is mandatory!");
         }
 
-        return ResponseUtil.sendResponse(usersService.updateUser(dto), landingTime, HttpStatus.OK, endPoint);
+        Object data = ResponseUtil.getDataFromResponse(authClient.updateUser(dto));
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
 
     @PutMapping("/updatePassword")
@@ -77,10 +96,12 @@ public class UsersController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        // Validates password else throws BadRequestException
-        PasswordValidator.validatePassword(dto.getPassword());
+        if (!StringUtils.hasText(dto.getPassword())) {
+            throw new BadRequestException("Password is mandatory!");
+        }
 
-        return ResponseUtil.sendResponse(usersService.updatePassword(dto), landingTime, HttpStatus.OK, endPoint);
+        Object data = ResponseUtil.getDataFromResponse(authClient.updatePassword(dto));
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
 
     @GetMapping("/getUser/{id}")
@@ -92,7 +113,23 @@ public class UsersController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        return ResponseUtil.sendResponse(usersService.getUser(id), landingTime, HttpStatus.OK, endPoint);
+        Object data = ResponseUtil.getDataFromResponse(authClient.getUser(id));
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
+    }
+
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ResponseDTO> refresh(@RequestBody AuthRequest dto) {
+        LocalDateTime landingTime = LocalDateTime.now();
+        String endPoint = "/refresh";
+
+        if (Objects.isNull(dto.getRefreshToken())) {
+            throw new BadRequestException("Refresh Token is mandatory!");
+        }
+
+        Object data = ResponseUtil.getDataFromResponse(authClient.refresh(dto));
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
+
     }
 
     @DeleteMapping("/deleteUser/{id}")
@@ -104,7 +141,7 @@ public class UsersController {
             throw new BadRequestException("Id is mandatory!");
         }
 
-        usersService.deleteUser(id);
-        return ResponseUtil.sendResponse(id, landingTime, HttpStatus.OK, endPoint);
+        Object data = ResponseUtil.getDataFromResponse(authClient.deleteUser(id));
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
 }
