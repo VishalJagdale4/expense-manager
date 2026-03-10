@@ -144,4 +144,13 @@ public class UserController {
         Object data = ResponseUtil.getDataFromResponse(authClient.deleteUser(id));
         return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseDTO> logout() {
+        LocalDateTime landingTime = LocalDateTime.now();
+        String endPoint = "/logout";
+
+        Object data = ResponseUtil.getDataFromResponse(authClient.logout());
+        return ResponseUtil.sendResponse(data, landingTime, HttpStatus.OK, endPoint);
+    }
 }

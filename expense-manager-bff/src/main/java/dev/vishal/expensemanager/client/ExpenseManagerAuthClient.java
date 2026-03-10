@@ -35,4 +35,7 @@ public interface ExpenseManagerAuthClient {
 
     @DeleteMapping("users/deleteUser/{id}")
     ResponseEntity<ResponseDTO> deleteUser(@PathVariable UUID id) throws BadRequestException;
+
+    @PostMapping("/auth/logout")
+    ResponseEntity<ResponseDTO> logout();
 }

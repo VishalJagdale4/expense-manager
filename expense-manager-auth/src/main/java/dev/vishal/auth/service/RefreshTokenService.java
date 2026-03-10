@@ -8,4 +8,6 @@ public interface RefreshTokenService {
     void createRefreshToken(UUID userId, String token);
 
     RefreshTokens verifyRefreshToken(String token);
+
+    void deleteByUser();
 }
