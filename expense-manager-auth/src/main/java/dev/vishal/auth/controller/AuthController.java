@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,7 +62,7 @@ public class AuthController {
         LocalDateTime landingTime = LocalDateTime.now();
         String endPoint = "/refresh";
 
-        if(Objects.isNull(request.refreshToken())){
+        if (Objects.isNull(request.refreshToken())) {
             throw new UnauthorizedException("Refresh Token is mandatory!");
         }
 
@@ -80,6 +79,17 @@ public class AuthController {
                 .build();
 
         return ResponseUtil.sendResponse(authResponse, landingTime, HttpStatus.OK, endPoint);
+
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseDTO> logout() {
+        LocalDateTime landingTime = LocalDateTime.now();
+        String endPoint = "/logout";
+
+        refreshTokenService.deleteByUser();
+
+        return ResponseUtil.sendResponse("Success", landingTime, HttpStatus.OK, endPoint);
 
     }
 

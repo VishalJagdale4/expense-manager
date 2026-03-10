@@ -3,6 +3,7 @@ package dev.vishal.expensemanager.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -32,6 +33,10 @@ public class Account {
 
     @Column(name = "is_deleted")
     private Boolean isDeleted;
+
+    // Cached balance
+    @Transient
+    private BigDecimal balance;
 
     @PrePersist
     protected void onCreate() {

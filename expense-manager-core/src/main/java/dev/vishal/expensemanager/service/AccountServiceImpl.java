@@ -1,7 +1,10 @@
 package dev.vishal.expensemanager.service;
 
 import dev.common.exceptionutils.exceptions.BadRequestException;
+import dev.vishal.expensemanager.dao.TransactionsDao;
 import dev.vishal.expensemanager.dto.AccountDto;
+import dev.vishal.expensemanager.dto.TransactionDto;
+import dev.vishal.expensemanager.dto.TransactionResponseDto;
 import dev.vishal.expensemanager.entity.Account;
 import dev.vishal.expensemanager.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,14 +13,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
+    private final TransactionsDao transactionsDao;
 
     @Override
     public Account createAccount(AccountDto dto) throws BadRequestException {
@@ -41,20 +48,35 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account getAccount(Long id, UUID userId) throws BadRequestException {
-        return accountRepository.findById(id)
+        Account account = accountRepository.findById(id)
                 .filter(a -> a.getUserId().equals(userId))
                 .filter(a -> !a.getIsDeleted())
                 .orElseThrow(() -> new BadRequestException("Account not found"));
+
+        // Get All txn against account and calculate balance
+        setCalculatedBalance(userId, List.of(account));
+
+        return account;
     }
 
     @Override
     public List<Account> getAccountByType(UUID userId, String type) throws BadRequestException {
-        return accountRepository.findByUserIdAndTypeAndIsDeletedFalseOrderByName(userId, type);
+        List<Account> accounts = accountRepository.findByUserIdAndTypeAndIsDeletedFalseOrderByName(userId, type);
+
+        // Get All txn against account and calculate balance
+        setCalculatedBalance(userId, accounts);
+
+        return accounts;
     }
 
     @Override
     public List<Account> getAllAccounts(UUID userId) {
-        return accountRepository.findAllByUserIdAndIsDeletedFalseOrderByName(userId);
+        List<Account> accounts = accountRepository.findAllByUserIdAndIsDeletedFalseOrderByName(userId);
+
+        // Get All txn against account and calculate balance
+        setCalculatedBalance(userId, accounts);
+
+        return accounts;
     }
 
     @Override
@@ -102,6 +124,35 @@ public class AccountServiceImpl implements AccountService {
         entity.setUserId(dto.getUserId());
         entity.setName(dto.getName());
         entity.setType(dto.getType());
+    }
+
+    private void setCalculatedBalance(UUID userId, List<Account> accounts) {
+        List<Long> accountIds = accounts.stream()
+                .map(Account::getId)
+                .toList();
+
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accounts(accountIds)
+                .orderByAsc(Boolean.TRUE)
+                .userId(userId)
+                .build();
+
+        List<TransactionResponseDto> transactions = transactionsDao.findTransactions(transactionDto);
+
+        Map<Long, List<TransactionResponseDto>> txnAccountMap =
+                transactions.stream()
+                        .collect(Collectors.groupingBy(TransactionResponseDto::getAccountId));
+
+        accounts.forEach(account -> {
+
+            BigDecimal balance = txnAccountMap
+                    .getOrDefault(account.getId(), Collections.emptyList())
+                    .stream()
+                    .map(TransactionResponseDto::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            account.setBalance(balance);
+        });
     }
 
 }

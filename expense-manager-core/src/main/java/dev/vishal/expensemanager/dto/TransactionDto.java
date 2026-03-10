@@ -1,5 +1,6 @@
 package dev.vishal.expensemanager.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
+@Builder
 public class TransactionDto {
     private UUID id;
     private UUID userId;
